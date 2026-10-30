@@ -1,0 +1,56 @@
+import { Schema, model, Document, Types } from "mongoose";
+
+export type FeedType = "post" | "announcement" | "event";
+export type FeedVisibility = "public" | "group" | "private";
+
+export interface IPost extends Document {
+  authorId: Types.ObjectId;
+  groupId: Types.ObjectId | null;
+  type: FeedType;
+  visibility: FeedVisibility;
+  title: string | null;
+  body: string;
+  caption?: string;
+  mediaUrls: string[];
+  hashtags: string[];
+  likes: Types.ObjectId[];
+  eventDate: Date | null;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  originalPostId?: Types.ObjectId | null;
+  isReshare: boolean;
+}
+
+const PostSchema = new Schema<IPost>(
+  {
+    authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    groupId: { type: Schema.Types.ObjectId, ref: "Group", default: null },
+    type: { type: String, enum: ["post", "announcement", "event"], default: "post" },
+    visibility: { type: String, enum: ["public", "group", "private"], default: "public" },
+    title: { type: String, default: null },
+    body: { 
+      type: String, 
+      required: function() {
+        return !(this as any).isReshare;
+      }
+    },
+    caption: { type: String, default: "" },
+    mediaUrls: [{ type: String }],
+    hashtags: [{ type: String }],
+    likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    eventDate: { type: Date, default: null },
+    isDeleted: { type: Boolean, default: false },
+    originalPostId: { type: Schema.Types.ObjectId, ref: "Post", default: null },
+    isReshare: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+// FIX: Compound indexes for common feed query patterns
+PostSchema.index({ isDeleted: 1, visibility: 1, groupId: 1, createdAt: -1 }); // main feed
+PostSchema.index({ authorId: 1, isDeleted: 1, createdAt: -1 });               // profile posts
+PostSchema.index({ groupId: 1, isDeleted: 1, createdAt: -1 });                 // group feed
+PostSchema.index({ hashtags: 1, isDeleted: 1 });                               // hashtag search
+
+export const Post = model<IPost>("Post", PostSchema);
