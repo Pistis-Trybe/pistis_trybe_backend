@@ -8,7 +8,11 @@ const reject = (res: Response, status: number, message: string) =>
 
 // Expects the client token in `recaptchaToken` (body) or the `x-recaptcha-token` header.
 // Works for both reCAPTCHA v2 and v3 (v3 responses also carry a score).
-export const verifyRecaptcha = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyRecaptcha = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const secret = config.RECAPTCHA_SECRET_KEY;
   const bodyToken = req.body?.recaptchaToken;
   const token = bodyToken ?? req.headers["x-recaptcha-token"];
@@ -19,9 +23,15 @@ export const verifyRecaptcha = async (req: Request, res: Response, next: NextFun
   if (!secret) {
     if (config.stage === "production") {
       console.error("RECAPTCHA_SECRET_KEY is not set: rejecting request.");
-      return reject(res, 503, "Captcha verification is unavailable. Please try again later.");
+      return reject(
+        res,
+        503,
+        "Captcha verification is unavailable. Please try again later.",
+      );
     }
-    console.warn("RECAPTCHA_SECRET_KEY is not set: skipping captcha check in development.");
+    console.warn(
+      "RECAPTCHA_SECRET_KEY is not set: skipping captcha check in development.",
+    );
     return next();
   }
 
@@ -41,13 +51,19 @@ export const verifyRecaptcha = async (req: Request, res: Response, next: NextFun
     });
     const result: any = await response.json();
 
-    const lowScore = typeof result.score === "number" && result.score < config.RECAPTCHA_MIN_SCORE;
+    const lowScore =
+      typeof result.score === "number" &&
+      result.score < config.RECAPTCHA_MIN_SCORE;
     if (!result.success || lowScore) {
       return reject(res, 400, "Captcha verification failed. Please try again.");
     }
     return next();
   } catch (error: any) {
     console.error("reCAPTCHA verification error:", error.message);
-    return reject(res, 503, "Captcha verification is unavailable. Please try again later.");
+    return reject(
+      res,
+      503,
+      "Captcha verification is unavailable. Please try again later.",
+    );
   }
 };
