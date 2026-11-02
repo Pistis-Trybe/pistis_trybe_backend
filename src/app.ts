@@ -53,7 +53,16 @@ function createApp() {
     message: { status: "error", message: "Too many auth attempts. Please try again later." },
   });
 
+  const feedbackLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: "error", message: "Too many feedback submissions. Please try again later." },
+  });
+
   app.use(globalLimiter);
+  app.post("/v1/feedback", feedbackLimiter);
   app.use("/v1/auth/login", authLimiter);
   app.use("/v1/auth/register", authLimiter);
   app.use("/v1/auth/verify-email", authLimiter);

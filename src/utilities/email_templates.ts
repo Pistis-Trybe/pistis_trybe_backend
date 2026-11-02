@@ -1,3 +1,6 @@
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
 const layout = (title: string, body: string) => `
 <!doctype html>
 <html>
@@ -46,4 +49,15 @@ export const resetPasswordEmail = (link: string, minutes: number) => ({
      <p style="margin:20px 0 0;font-size:12px;color:#6e6785;word-break:break-all;">Or paste this link into your browser:<br>${link}</p>`,
   ),
   text: `Reset your Pistis Trybe password (valid for ${minutes} minutes): ${link}`,
+});
+
+
+export const feedbackEmail = ({ name, email, message }: { name: string; email: string; message: string }) => ({
+  subject: `New feedback from ${name.replace(/[\r\n]+/g, " ")}`,
+  html: layout(
+    "New feedback",
+    `<p style="margin:0 0 6px;font-size:14px;color:#4a4458;"><strong>From:</strong> ${escapeHtml(name)} (${escapeHtml(email)})</p>
+     <div style="margin-top:14px;padding:16px;border-radius:14px;background:#f3f1f8;color:#14101c;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(message)}</div>`,
+  ),
+  text: `New feedback from ${name} (${email}):\n\n${message}`,
 });

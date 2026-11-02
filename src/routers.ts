@@ -10,6 +10,7 @@ import notificationsV1Router from "./notifications/notifications.routes";
 import adminV1Router from "./admin/admin.routes";
 import devotionalsV1Router from "./devotionals/devotionals.routes";
 import announcementsV1Router from "./announcements/announcements.routes";
+import feedbackV1Router from "./feedback/feedback.routes";
 
 const pistisTribeRouterV1 = Router();
 
@@ -24,5 +25,6 @@ pistisTribeRouterV1.use(notificationsV1Router);
 pistisTribeRouterV1.use(adminV1Router);
 pistisTribeRouterV1.use(devotionalsV1Router);
 pistisTribeRouterV1.use(announcementsV1Router);
+pistisTribeRouterV1.use(feedbackV1Router);
 
 export { pistisTribeRouterV1 };
